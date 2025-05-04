@@ -13,13 +13,25 @@ const WatchlistButton = ({ animeId, size = 'normal', iconOnly = false }) => {
   useEffect(() => {
     const checkWatchlist = async () => {
       if (!isAuthenticated || !currentProfile) {
+        console.log('No hay autenticación o perfil seleccionado - omitiendo verificación de watchlist');
+        setLoading(false);
+        return;
+      }
+      
+      if (!animeId) {
+        console.log('No se proporcionó animeId - omitiendo verificación de watchlist');
         setLoading(false);
         return;
       }
       
       setLoading(true);
       try {
+        console.log('Verificando si el anime está en watchlist:', {
+          profileId: currentProfile._id,
+          animeId: animeId
+        });
         const result = await isInWatchlist(animeId);
+        console.log('Resultado de verificación de watchlist:', result);
         setInWatchlist(!!result);
       } catch (error) {
         console.error('Error al comprobar watchlist:', error);

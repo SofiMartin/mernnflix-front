@@ -44,6 +44,7 @@ const AnimeList = () => {
   // Aplicar filtros y ordenamiento cuando cambian las opciones de filtrado
   useEffect(() => {
     console.log("Aplicando filtros con opciones:", {
+      page: currentPage,
       sortBy,
       sortOrder,
       selectedGenre,
@@ -51,6 +52,7 @@ const AnimeList = () => {
       searchTerm,
     });
     fetchAnimes({
+      page: currentPage,
       sort: sortBy,
       order: sortOrder,
       genre: selectedGenre,
@@ -58,6 +60,7 @@ const AnimeList = () => {
       search: searchTerm,
     });
   }, [
+    currentPage,
     sortBy,
     sortOrder,
     selectedGenre,
