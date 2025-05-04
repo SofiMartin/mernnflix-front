@@ -1,13 +1,22 @@
 import { useState, useEffect, useContext } from 'react';
 import { WatchlistContext } from '../context/watchlistContext';
+import { AuthContext } from '../context/authContext';
+import { ProfileContext } from '../context/ProfileContext';
 
-const WatchlistButton = ({ animeId }) => {
+const WatchlistButton = ({ animeId, size = 'normal', iconOnly = false }) => {
   const { isInWatchlist, addToWatchlist, removeAnimeFromWatchlist } = useContext(WatchlistContext);
+  const { isAuthenticated } = useContext(AuthContext);
+  const { currentProfile } = useContext(ProfileContext);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const checkWatchlist = async () => {
+      if (!isAuthenticated || !currentProfile) {
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
       try {
         const result = await isInWatchlist(animeId);
@@ -22,9 +31,14 @@ const WatchlistButton = ({ animeId }) => {
     if (animeId) {
       checkWatchlist();
     }
-  }, [animeId, isInWatchlist]);
+  }, [animeId, isAuthenticated, currentProfile, isInWatchlist]);
   
   const handleToggleWatchlist = async () => {
+    if (!isAuthenticated || !currentProfile) {
+      // Podrías mostrar un mensaje o redireccionar al login
+      return;
+    }
+    
     setLoading(true);
     try {
       if (inWatchlist) {
@@ -41,15 +55,29 @@ const WatchlistButton = ({ animeId }) => {
     }
   };
   
+  // Si no hay usuario o perfil autenticado, no mostrar el botón
+  if (!isAuthenticated || !currentProfile) {
+    return null;
+  }
+  
+  // Determinar clases según el tamaño
+  const sizeClasses = size === 'small' 
+    ? 'px-2 py-1 text-xs' 
+    : size === 'large'
+      ? 'px-6 py-3 text-base'
+      : 'px-4 py-2 text-sm';
+  
+  // Determinar clases según si está en la watchlist
+  const stateClasses = inWatchlist
+    ? 'bg-green-700 hover:bg-green-800 text-white'
+    : 'bg-purple-700 hover:bg-purple-800 text-white';
+  
   return (
     <button
       onClick={handleToggleWatchlist}
       disabled={loading}
-      className={`flex items-center justify-center px-4 py-2 rounded-lg transition-colors ${
-        inWatchlist
-          ? 'bg-green-700 hover:bg-green-800 text-white'
-          : 'bg-purple-700 hover:bg-purple-800 text-white'
-      } ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+      className={`flex items-center justify-center rounded-md transition-colors ${sizeClasses} ${stateClasses} ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+      title={inWatchlist ? 'Quitar de mi lista' : 'Añadir a mi lista'}
     >
       {loading ? (
         <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -61,14 +89,14 @@ const WatchlistButton = ({ animeId }) => {
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
           </svg>
-          En mi lista
+          {!iconOnly && 'En mi lista'}
         </>
       ) : (
         <>
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
-          Añadir a mi lista
+          {!iconOnly && 'Añadir a mi lista'}
         </>
       )}
     </button>

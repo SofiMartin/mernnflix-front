@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { AuthContext } from '../context/authContext';
+import WatchlistButton from './WatchlistButton';
 
 const AnimeCard = ({ anime }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { currentUser, isAuthenticated } = useContext(AuthContext);
   
   // Determinar el color de fondo para el estado del anime
   const statusBgColor = anime.status === 'Finalizado' 
@@ -103,17 +106,26 @@ const AnimeCard = ({ anime }) => {
           >
             Detalles
           </Link>
-          <Link 
-            to={`/animes/${anime.id}/edit`} 
-            className="p-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md transition-colors"
-            aria-label="Editar"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-            </svg>
-          </Link>
+
+          <div className="flex space-x-2">
+    {/* Botón de Watchlist */}
+    <WatchlistButton animeId={anime.id} size="small" iconOnly={true} />
+          
+          {/* Mostrar el botón de editar solo si el usuario es administrador */}
+          {isAuthenticated && currentUser && currentUser.isAdmin && (
+            <Link 
+              to={`/animes/${anime.id}/edit`} 
+              className="p-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md transition-colors"
+              aria-label="Editar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            </Link>
+          )}
         </div>
       </div>
+    </div>
     </div>
   );
 };
