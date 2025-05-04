@@ -5,7 +5,7 @@ import { AuthContext } from '../context/authContext';
 
 const Home = () => {
   const { animes, getRandomAnimes } = useContext(AnimeContext);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, currentUser } = useContext(AuthContext);
   const [trendingAnimes, setTrendingAnimes] = useState([]);
   const [heroBackdrop, setHeroBackdrop] = useState('');
   const [featuredAnimes, setFeaturedAnimes] = useState([]);
@@ -375,12 +375,21 @@ const Home = () => {
               >
                 Gestionar Perfiles
               </Link>
-              <Link 
-                to="/animes/create" 
-                className="px-8 py-3 rounded-full bg-white text-purple-900 font-bold hover:bg-purple-100 transition-all"
-              >
-                Añadir Anime
-              </Link>
+              {currentUser && currentUser.isAdmin ? (
+                <Link 
+                  to="/animes/create" 
+                  className="px-8 py-3 rounded-full bg-white text-purple-900 font-bold hover:bg-purple-100 transition-all"
+                >
+                  Añadir Anime
+                </Link>
+              ) : (
+                <Link 
+                  to="/animes" 
+                  className="px-8 py-3 rounded-full bg-white text-purple-900 font-bold hover:bg-purple-100 transition-all"
+                >
+                  Explorar Animes
+                </Link>
+              )}
             </div>
           )}
         </div>

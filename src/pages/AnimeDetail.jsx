@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { AnimeContext } from '../context/AnimeContext';
 import { ProfileContext } from '../context/ProfileContext';
 import { AuthContext } from '../context/authContext';
@@ -10,7 +10,7 @@ const AnimeDetail = () => {
   const { id } = useParams();
   const { getAnimeById, deleteAnime } = useContext(AnimeContext);
   const { currentProfile } = useContext(ProfileContext);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, currentUser } = useContext(AuthContext);
   const [anime, setAnime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -159,7 +159,7 @@ const AnimeDetail = () => {
       <div className="relative w-full h-64 md:h-96 overflow-hidden">
         {/* Imagen de fondo con efecto blur */}
         <div
-          className="absolute inset-0 bg-cover bg-center blur-md" 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
           style={{ 
             backgroundImage: `url(${anime.imageUrl})`,
             filter: 'brightness(0.3) saturate(1.2)',
@@ -253,24 +253,28 @@ const AnimeDetail = () => {
                 <>
                   <WatchlistButton animeId={anime._id} />
                   
-                  <Link 
-                    to={`/animes/${id}/edit`} 
-                    className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                    Editar
-                  </Link>
-                  <button 
-                    onClick={handleDelete} 
-                    className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                    Eliminar
-                  </button>
+                  {currentUser && currentUser.isAdmin && (
+                    <>
+                      <Link 
+                        to={`/animes/${id}/edit`} 
+                        className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Editar
+                      </Link>
+                      <button 
+                        onClick={handleDelete} 
+                        className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Eliminar
+                      </button>
+                    </>
+                  )}
                 </>
               ) : (
                 <>
@@ -320,24 +324,28 @@ const AnimeDetail = () => {
             <>
               <WatchlistButton animeId={anime._id} />
               
-              <Link 
-                to={`/animes/${id}/edit`} 
-                className="flex-1 px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-                Editar
-              </Link>
-              <button 
-                onClick={handleDelete} 
-                className="flex-1 px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-                Eliminar
-              </button>
+              {currentUser && currentUser.isAdmin && (
+                <>
+                  <Link 
+                    to={`/animes/${id}/edit`} 
+                    className="flex-1 px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Editar
+                  </Link>
+                  <button 
+                    onClick={handleDelete} 
+                    className="flex-1 px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Eliminar
+                  </button>
+                </>
+              )}
             </>
           ) : (
             <>
@@ -437,7 +445,6 @@ const AnimeDetail = () => {
                 ))}
               </div>
             </div>
-            
             {/* Navegación */}
             <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
               <div className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 p-4 border-b border-gray-700">
@@ -454,7 +461,7 @@ const AnimeDetail = () => {
                   Volver al catálogo
                 </Link>
                 
-                {isAuthenticated && (
+                {isAuthenticated && currentUser && currentUser.isAdmin && (
                   <Link 
                     to="/animes/create" 
                     className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors w-full"
@@ -543,4 +550,4 @@ const AnimeDetail = () => {
   );
 };
 
-export default AnimeDetail; 
+export default AnimeDetail;

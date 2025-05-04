@@ -166,7 +166,8 @@ const Navbar = () => {
               </NavLink>
             )}
             
-            {currentUser && currentProfile && (
+            {/* Botón AGREGAR solo visible para administradores */}
+            {currentUser && currentProfile && currentUser.isAdmin && (
               <NavLink 
                 to="/animes/create" 
                 className="ml-4 px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium hover:shadow-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
@@ -387,19 +388,22 @@ const Navbar = () => {
               >
                 MI LISTA
               </NavLink>
-              <NavLink 
-                to="/animes/create" 
-                className={({ isActive }) => 
-                  `block px-4 py-3 border-l-4 rounded-r-md transition-all ${
-                    isActive 
-                      ? 'border-purple-500 bg-purple-900 bg-opacity-40 text-white' 
-                      : 'border-transparent text-gray-300 hover:bg-gray-900 hover:text-white'
-                  }`
-                }
-                onClick={closeMenu}
-              >
-                AGREGAR ANIME
-              </NavLink>
+              {/* Botón AGREGAR ANIME solo visible para administradores */}
+              {currentUser.isAdmin && (
+                <NavLink 
+                  to="/animes/create" 
+                  className={({ isActive }) => 
+                    `block px-4 py-3 border-l-4 rounded-r-md transition-all ${
+                      isActive 
+                        ? 'border-purple-500 bg-purple-900 bg-opacity-40 text-white' 
+                        : 'border-transparent text-gray-300 hover:bg-gray-900 hover:text-white'
+                    }`
+                  }
+                  onClick={closeMenu}
+                >
+                  AGREGAR ANIME
+                </NavLink>
+              )}
             
               {/* Cerrar sesión (móvil) */}
               <button 

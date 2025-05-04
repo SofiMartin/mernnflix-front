@@ -4,6 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Rutas protegidas
 import ProtectedRoute from './ProtectedRoute';
+import AdminRoute from './AdminRoute';
 
 // Páginas
 import Home from '../pages/Home';
@@ -79,19 +80,19 @@ const AppRouter = () => {
           
           {/* Rutas que requieren autenticación y perfil seleccionado */}
           <Route path="/animes/create" element={
-            <ProtectedRoute requireAuth={true} requireProfile={true}>
+            <AdminRoute>
               <Navbar />
               <AnimeCreate />
               <Footer />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
           
           <Route path="/animes/:id/edit" element={
-            <ProtectedRoute requireAuth={true} requireProfile={true}>
+            <AdminRoute>
               <Navbar />
               <AnimeEdit />
               <Footer />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
           
           <Route path="/watchlist" element={
