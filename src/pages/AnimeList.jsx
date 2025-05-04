@@ -1,10 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimeContext } from '../context/AnimeContext';
+import { AuthContext } from '../context/authContext';
 import AnimeCard from '../components/AnimeCard';
 
 const AnimeList = () => {
-  const { animes, loading, error } = useContext(AnimeContext);
+  const { animes, loading, error, fetchAnimes, totalAnimes, currentPage, totalPages } = useContext(AnimeContext);
+  const { currentUser, isAuthenticated } = useContext(AuthContext);
   const [filteredAnimes, setFilteredAnimes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -16,51 +18,38 @@ const AnimeList = () => {
   // Lista única de géneros a partir de todos los animes
   const allGenres = [...new Set(animes.flatMap(anime => anime.genres))].sort();
   
-  // Aplicar filtros y ordenamiento
+  // Cargar animes cuando se monta el componente
   useEffect(() => {
-    let result = [...animes];
-    
-    // Filtrar por término de búsqueda
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(anime => 
-        anime.title.toLowerCase().includes(term) || 
-        anime.synopsis.toLowerCase().includes(term)
-      );
-    }
-    
-    // Filtrar por género
-    if (selectedGenre) {
-      result = result.filter(anime => 
-        anime.genres.includes(selectedGenre)
-      );
-    }
-    
-    // Filtrar por estado
-    if (selectedStatus) {
-      result = result.filter(anime => 
-        anime.status === selectedStatus
-      );
-    }
-    
-    // Ordenar resultados
-    result.sort((a, b) => {
-      if (sortBy === 'rating') {
-        return sortOrder === 'asc' ? a.rating - b.rating : b.rating - a.rating;
-      } else if (sortBy === 'title') {
-        return sortOrder === 'asc' 
-          ? a.title.localeCompare(b.title) 
-          : b.title.localeCompare(a.title);
-      } else if (sortBy === 'year') {
-        return sortOrder === 'asc' 
-          ? a.releaseYear - b.releaseYear 
-          : b.releaseYear - a.releaseYear;
-      }
-      return 0;
+    // Llamamos directamente a fetchAnimes para cargar los animes
+    console.log("Montando componente AnimeList, llamando a fetchAnimes");
+    fetchAnimes({
+      sort: sortBy,
+      order: sortOrder,
+      genre: selectedGenre,
+      status: selectedStatus,
+      search: searchTerm
     });
-    
-    setFilteredAnimes(result);
-  }, [animes, searchTerm, selectedGenre, selectedStatus, sortBy, sortOrder]);
+  }, [fetchAnimes]); // Solo al montar
+  
+  // Aplicar filtros y ordenamiento cuando cambian las opciones de filtrado
+  useEffect(() => {
+    console.log("Aplicando filtros con opciones:", { 
+      sortBy, sortOrder, selectedGenre, selectedStatus, searchTerm 
+    });
+    fetchAnimes({
+      sort: sortBy,
+      order: sortOrder,
+      genre: selectedGenre,
+      status: selectedStatus,
+      search: searchTerm
+    });
+  }, [sortBy, sortOrder, selectedGenre, selectedStatus, searchTerm, fetchAnimes]);
+  
+  // Actualizar filteredAnimes cuando cambian los animes
+  useEffect(() => {
+    setFilteredAnimes(animes);
+    console.log("Animes actualizados:", animes);
+  }, [animes]);
   
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -117,12 +106,20 @@ const AnimeList = () => {
               <h2 className="text-xl font-bold text-white">Error</h2>
             </div>
             <p className="text-red-200 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-lg transition-colors"
-            >
-              Reintentar
-            </button>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => fetchAnimes()} 
+                className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-lg transition-colors"
+              >
+                Reintentar
+              </button>
+              <Link
+                to="/"
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Volver al inicio
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -139,15 +136,18 @@ const AnimeList = () => {
               Explorar Animes
             </span>
           </h1>
-          <Link 
-            to="/animes/create" 
-            className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Agregar Anime
-          </Link>
+          {/* Mostrar el botón solo si el usuario es administrador */}
+          {isAuthenticated && currentUser && currentUser.isAdmin && (
+            <Link 
+              to="/animes/create" 
+              className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Agregar Anime
+            </Link>
+          )}
         </div>
         
         {/* Barra de filtros */}
@@ -297,20 +297,70 @@ const AnimeList = () => {
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-300">
                 <span className="font-medium text-white">{filteredAnimes.length}</span> {filteredAnimes.length === 1 ? 'anime encontrado' : 'animes encontrados'}
+                {totalAnimes > filteredAnimes.length && ` (mostrando ${filteredAnimes.length} de ${totalAnimes})`}
               </p>
+              
+              {/* Paginación si es necesario */}
+              {totalPages > 1 && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => fetchAnimes({ 
+                      page: currentPage - 1,
+                      sort: sortBy,
+                      order: sortOrder,
+                      genre: selectedGenre,
+                      status: selectedStatus,
+                      search: searchTerm
+                    })}
+                    disabled={currentPage <= 1}
+                    className={`p-2 rounded-md ${
+                      currentPage <= 1 
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+                  <span className="text-gray-300">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <button
+                    onClick={() => fetchAnimes({ 
+                      page: currentPage + 1,
+                      sort: sortBy,
+                      order: sortOrder,
+                      genre: selectedGenre,
+                      status: selectedStatus,
+                      search: searchTerm
+                    })}
+                    disabled={currentPage >= totalPages}
+                    className={`p-2 rounded-md ${
+                      currentPage >= totalPages 
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Lista de animes */}
             {currentView === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {filteredAnimes.map(anime => (
-                  <AnimeCard key={anime.id} anime={anime} />
+                  <AnimeCard key={anime.id || anime._id} anime={anime} />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
                 {filteredAnimes.map(anime => (
-                  <div key={anime.id} className="flex bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
+                  <div key={anime.id || anime._id} className="flex bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
                     <div className="w-24 md:w-36 flex-shrink-0">
                       <img 
                         src={anime.imageUrl} 
@@ -333,7 +383,7 @@ const AnimeList = () => {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1 my-2">
-                        {anime.genres.map((genre, index) => (
+                        {anime.genres && anime.genres.map((genre, index) => (
                           <span 
                             key={index} 
                             className="px-2 py-1 bg-purple-900/40 text-purple-200 text-xs rounded-full"
@@ -355,22 +405,155 @@ const AnimeList = () => {
                         </div>
                         <div className="flex space-x-2">
                           <Link 
-                            to={`/animes/${anime.id}`} 
+                            to={`/animes/${anime.id || anime._id}`} 
                             className="px-4 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
                           >
                             Detalles
                           </Link>
-                          <Link 
-                            to={`/animes/${anime.id}/edit`} 
-                            className="px-4 py-1 bg-purple-700 hover:bg-purple-600 text-white text-sm rounded transition-colors"
-                          >
-                            Editar
-                          </Link>
+                          {isAuthenticated && currentUser && currentUser.isAdmin && (
+                            <Link 
+                              to={`/animes/${anime.id || anime._id}/edit`} 
+                              className="px-4 py-1 bg-purple-700 hover:bg-purple-600 text-white text-sm rounded transition-colors"
+                            >
+                              Editar
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            
+            {/* Paginación inferior si hay muchos resultados */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => fetchAnimes({ 
+                      page: 1,
+                      sort: sortBy,
+                      order: sortOrder,
+                      genre: selectedGenre,
+                      status: selectedStatus,
+                      search: searchTerm
+                    })}
+                    disabled={currentPage <= 1}
+                    className={`p-2 rounded-md ${
+                      currentPage <= 1 
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+                  
+                  <button
+                    onClick={() => fetchAnimes({ 
+                      page: currentPage - 1,
+                      sort: sortBy,
+                      order: sortOrder,
+                      genre: selectedGenre,
+                      status: selectedStatus,
+                      search: searchTerm
+                    })}
+                    disabled={currentPage <= 1}
+                    className={`p-2 rounded-md ${
+                      currentPage <= 1 
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+                  
+                  {/* Páginas numéricas */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    // Calcular qué páginas mostrar
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      // Si hay 5 o menos páginas, mostrar todas
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      // Si estamos cerca del inicio
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      // Si estamos cerca del final
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      // Si estamos en el medio
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => fetchAnimes({ 
+                          page: pageNum,
+                          sort: sortBy,
+                          order: sortOrder,
+                          genre: selectedGenre,
+                          status: selectedStatus,
+                          search: searchTerm
+                        })}
+                        className={`w-10 h-10 rounded-md ${
+                          currentPage === pageNum 
+                            ? 'bg-purple-700 text-white' 
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  
+                  <button
+                    onClick={() => fetchAnimes({ 
+                      page: currentPage + 1,
+                      sort: sortBy,
+                      order: sortOrder,
+                      genre: selectedGenre,
+                      status: selectedStatus,
+                      search: searchTerm
+                    })}
+                    disabled={currentPage >= totalPages}
+                    className={`p-2 rounded-md ${
+                      currentPage >= totalPages 
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                  
+                  <button
+                    onClick={() => fetchAnimes({ 
+                      page: totalPages,
+                      sort: sortBy,
+                      order: sortOrder,
+                      genre: selectedGenre,
+                      status: selectedStatus,
+                      search: searchTerm
+                    })}
+                    disabled={currentPage >= totalPages}
+                    className={`p-2 rounded-md ${
+                      currentPage >= totalPages 
+                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
           </>

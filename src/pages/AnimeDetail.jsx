@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { AnimeContext } from '../context/AnimeContext';
 import { ProfileContext } from '../context/ProfileContext';
+import { AuthContext } from '../context/authContext';
 import WatchlistButton from '../components/WatchlistButton';
 import Swal from 'sweetalert2';
 
@@ -9,6 +10,7 @@ const AnimeDetail = () => {
   const { id } = useParams();
   const { getAnimeById, deleteAnime } = useContext(AnimeContext);
   const { currentProfile } = useContext(ProfileContext);
+  const { isAuthenticated } = useContext(AuthContext);
   const [anime, setAnime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -113,7 +115,7 @@ const AnimeDetail = () => {
   }
 
   // Si el contenido no es apropiado para el perfil, mostrar advertencia
-  if (!isContentAppropriate()) {
+  if (isAuthenticated && currentProfile && !isContentAppropriate()) {
     return (
       <div className="min-h-screen bg-gray-900 pt-24 pb-16">
         <div className="container mx-auto px-4">
@@ -192,8 +194,8 @@ const AnimeDetail = () => {
               <div className="flex items-center gap-3 mb-2">
                 <span className={`px-3 py-1 rounded-full text-xs ${
                   anime.status === 'Finalizado' 
-                    ? 'bg-blue-900/60 text-blue-200' 
-                    : 'bg-green-900/60 text-green-200'
+                    ? 'bg-blue-900/80 text-blue-200' 
+                    : 'bg-green-900/80 text-green-200'
                 }`}>
                   {anime.status}
                 </span>
@@ -247,26 +249,51 @@ const AnimeDetail = () => {
             
             {/* Acciones (visible solo en desktop) */}
             <div className="hidden md:flex md:flex-col gap-2 ml-auto">
-              <WatchlistButton animeId={anime._id} />
-              
-              <Link 
-                to={`/animes/${id}/edit`} 
-                className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-                Editar
-              </Link>
-              <button 
-                onClick={handleDelete} 
-                className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-                Eliminar
-              </button>
+              {isAuthenticated && currentProfile ? (
+                <>
+                  <WatchlistButton animeId={anime._id} />
+                  
+                  <Link 
+                    to={`/animes/${id}/edit`} 
+                    className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Editar
+                  </Link>
+                  <button 
+                    onClick={handleDelete} 
+                    className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Eliminar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link 
+                    to="/login" 
+                    className="px-6 py-2 rounded-md bg-purple-700 text-white hover:bg-purple-600 transition-colors flex items-center justify-center"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    Iniciar sesión
+                  </Link>
+                  <Link 
+                    to="/register" 
+                    className="px-6 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition-colors flex items-center justify-center"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                    Crear cuenta
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -289,26 +316,51 @@ const AnimeDetail = () => {
       {/* Acciones (visible solo en móvil) */}
       <div className="md:hidden container mx-auto px-4 py-4">
         <div className="flex gap-2">
-          <WatchlistButton animeId={anime._id} />
-          
-          <Link 
-            to={`/animes/${id}/edit`} 
-            className="flex-1 px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-            </svg>
-            Editar
-          </Link>
-          <button 
-            onClick={handleDelete} 
-            className="flex-1 px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-            </svg>
-            Eliminar
-          </button>
+          {isAuthenticated && currentProfile ? (
+            <>
+              <WatchlistButton animeId={anime._id} />
+              
+              <Link 
+                to={`/animes/${id}/edit`} 
+                className="flex-1 px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Editar
+              </Link>
+              <button 
+                onClick={handleDelete} 
+                className="flex-1 px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Eliminar
+              </button>
+            </>
+          ) : (
+            <>
+              <Link 
+                to="/login" 
+                className="flex-1 px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-md flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                </svg>
+                Iniciar sesión
+              </Link>
+              <Link 
+                to="/register" 
+                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+                Crear cuenta
+              </Link>
+            </>
+          )}
         </div>
       </div>
       
@@ -392,7 +444,7 @@ const AnimeDetail = () => {
                 <h3 className="text-lg font-bold text-white">Acciones</h3>
               </div>
               <div className="p-4">
-                <Link 
+                <Link
                   to="/animes" 
                   className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors w-full mb-2"
                 >
@@ -401,26 +453,89 @@ const AnimeDetail = () => {
                   </svg>
                   Volver al catálogo
                 </Link>
-                <Link 
-                  to="/animes/create" 
-                  className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors w-full"
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                  </svg>
-                  Agregar nuevo anime
-                </Link>
-                <Link 
-                  to="/watchlist" 
-                  className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors w-full mt-2"
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                  </svg>
-                  Ver mi lista
-                </Link>
+                
+                {isAuthenticated && (
+                  <Link 
+                    to="/animes/create" 
+                    className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors w-full"
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Agregar nuevo anime
+                  </Link>
+                )}
+                
+                {isAuthenticated && currentProfile && (
+                  <Link 
+                    to="/watchlist" 
+                    className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors w-full mt-2"
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    Ver mi lista
+                  </Link>
+                )}
+                
+                {!isAuthenticated && (
+                  <div className="mt-4 p-4 bg-purple-900/20 border border-purple-800/30 rounded-lg text-center">
+                    <p className="text-sm text-gray-300 mb-3">
+                      Inicia sesión para añadir este anime a tu lista y acceder a más funciones
+                    </p>
+                    <div className="flex space-x-2">
+                      <Link 
+                        to="/login" 
+                        className="flex-1 py-2 px-3 bg-purple-700 hover:bg-purple-600 text-white text-sm rounded-md transition-colors"
+                      >
+                        Iniciar sesión
+                      </Link>
+                      <Link 
+                        to="/register" 
+                        className="flex-1 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-md transition-colors"
+                      >
+                        Registrarse
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
+            
+            {/* Recomendado para ti - Solo visible para usuarios autenticados */}
+            {isAuthenticated && currentProfile && (
+              <div className="mt-6 bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+                <div className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 p-4 border-b border-gray-700">
+                  <h3 className="text-lg font-bold text-white">Recomendado para ti</h3>
+                </div>
+                <div className="p-4">
+                  <p className="text-gray-400 text-sm mb-4">
+                    Basado en tus gustos y este anime, podrían interesarte:
+                  </p>
+                  <div className="space-y-3">
+                    {/* Aquí podrías mostrar animes recomendados basados en géneros similares */}
+                    <p className="text-gray-300 text-sm flex items-center">
+                      <svg className="w-4 h-4 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd"></path>
+                      </svg>
+                      Explora más animes del género {anime.genres[0]}
+                    </p>
+                    <p className="text-gray-300 text-sm flex items-center">
+                      <svg className="w-4 h-4 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd"></path>
+                      </svg>
+                      Más animes del estudio {anime.studio}
+                    </p>
+                    <p className="text-gray-300 text-sm flex items-center">
+                      <svg className="w-4 h-4 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd"></path>
+                      </svg>
+                      Animes del año {anime.releaseYear}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -428,4 +543,4 @@ const AnimeDetail = () => {
   );
 };
 
-export default AnimeDetail;
+export default AnimeDetail; 

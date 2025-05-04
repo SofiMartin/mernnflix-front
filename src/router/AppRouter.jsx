@@ -28,15 +28,46 @@ const AppRouter = () => {
         <Routes>
           {/* Rutas públicas */}
           <Route path="/login" element={
-            <ProtectedRoute requireAuth={false}>
+            <>
+              <Navbar />
               <Login />
-            </ProtectedRoute>
+              <Footer />
+            </>
           } />
           
           <Route path="/register" element={
-            <ProtectedRoute requireAuth={false}>
+            <>
+              <Navbar />
               <Register />
-            </ProtectedRoute>
+              <Footer />
+            </>
+          } />
+          
+          {/* Ruta principal - accesible para todos */}
+          <Route path="/" element={
+            <>
+              <Navbar />
+              <Home />
+              <Footer />
+            </>
+          } />
+          
+          {/* Ruta de exploración - accesible para todos */}
+          <Route path="/animes" element={
+            <>
+              <Navbar />
+              <AnimeList />
+              <Footer />
+            </>
+          } />
+          
+          {/* Ruta de detalle de anime - accesible para todos */}
+          <Route path="/animes/:id" element={
+            <>
+              <Navbar />
+              <AnimeDetail />
+              <Footer />
+            </>
           } />
           
           {/* Ruta de selección de perfiles - requiere auth pero no perfil */}
@@ -47,30 +78,6 @@ const AppRouter = () => {
           } />
           
           {/* Rutas que requieren autenticación y perfil seleccionado */}
-          <Route path="/" element={
-            <ProtectedRoute requireAuth={true} requireProfile={true}>
-              <Navbar />
-              <Home />
-              <Footer />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/animes" element={
-            <ProtectedRoute requireAuth={true} requireProfile={true}>
-              <Navbar />
-              <AnimeList />
-              <Footer />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/animes/:id" element={
-            <ProtectedRoute requireAuth={true} requireProfile={true}>
-              <Navbar />
-              <AnimeDetail />
-              <Footer />
-            </ProtectedRoute>
-          } />
-          
           <Route path="/animes/create" element={
             <ProtectedRoute requireAuth={true} requireProfile={true}>
               <Navbar />
