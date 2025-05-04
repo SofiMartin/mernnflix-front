@@ -144,7 +144,7 @@ class AnimeService {
   async searchExternalAPI(title) {
     try {
       console.log(`Buscando en API externa con título: "${title}"`);
-      const response = await axiosInstance.get(`/animes/external/search?title=${title}`);
+      const response = await axiosInstance.get(`/animes/external/search?title=${encodeURIComponent(title)}`);
       return response.data.data;
     } catch (error) {
       console.error("Error al buscar en API externa:", error);

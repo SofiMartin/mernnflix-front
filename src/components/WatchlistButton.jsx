@@ -2,6 +2,8 @@ import { useState, useEffect, useContext } from 'react';
 import { WatchlistContext } from '../context/watchlistContext';
 import { AuthContext } from '../context/authContext';
 import { ProfileContext } from '../context/ProfileContext';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const WatchlistButton = ({ animeId, size = 'normal', iconOnly = false }) => {
   const { isInWatchlist, addToWatchlist, removeAnimeFromWatchlist } = useContext(WatchlistContext);
@@ -9,6 +11,7 @@ const WatchlistButton = ({ animeId, size = 'normal', iconOnly = false }) => {
   const { currentProfile } = useContext(ProfileContext);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   
   useEffect(() => {
     const checkWatchlist = async () => {
@@ -47,7 +50,9 @@ const WatchlistButton = ({ animeId, size = 'normal', iconOnly = false }) => {
   
   const handleToggleWatchlist = async () => {
     if (!isAuthenticated || !currentProfile) {
-      // Podrías mostrar un mensaje o redireccionar al login
+      // Redirigir al login si no hay autenticación
+      toast.info('Debes iniciar sesión para agregar animes a tu lista');
+      navigate('/login');
       return;
     }
     
@@ -56,21 +61,19 @@ const WatchlistButton = ({ animeId, size = 'normal', iconOnly = false }) => {
       if (inWatchlist) {
         await removeAnimeFromWatchlist(animeId);
         setInWatchlist(false);
+        toast.success('Eliminado de tu lista');
       } else {
         await addToWatchlist(animeId);
         setInWatchlist(true);
+        toast.success('Añadido a tu lista');
       }
     } catch (error) {
       console.error('Error al actualizar watchlist:', error);
+      toast.error('Error al actualizar tu lista');
     } finally {
       setLoading(false);
     }
   };
-  
-  // Si no hay usuario o perfil autenticado, no mostrar el botón
-  if (!isAuthenticated || !currentProfile) {
-    return null;
-  }
   
   // Determinar clases según el tamaño
   const sizeClasses = size === 'small' 

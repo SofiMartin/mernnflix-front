@@ -1,10 +1,15 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimeContext } from '../context/AnimeContext';
+import { AuthContext } from '../context/authContext'; // Añadido para verificar si es admin
+import { ProfileContext } from '../context/ProfileContext'; // Añadido para acceder al perfil actual
 import AnimeCard from '../components/AnimeCard';
+import WatchlistButton from '../components/WatchlistButton'; // Añadido para el botón de watchlist
 
 const AnimeList = () => {
   const { animes, loading, error } = useContext(AnimeContext);
+  const { currentUser, isAuthenticated } = useContext(AuthContext); // Actualizado para incluir isAuthenticated
+  const { currentProfile } = useContext(ProfileContext); // Añadido para acceder al perfil actual
   const [filteredAnimes, setFilteredAnimes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -132,22 +137,38 @@ const AnimeList = () => {
   return (
     <div className="min-h-screen bg-gray-900 pt-24 pb-16">
       <div className="container mx-auto px-4">
-        {/* Header con título y botón para agregar */}
+        {/* Header con título y botones para agregar/importar */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-4 md:mb-0">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
               Explorar Animes
             </span>
           </h1>
-          <Link 
-            to="/animes/create" 
-            className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Agregar Anime
-          </Link>
+          
+          {/* Botones para admin */}
+          {currentUser && currentUser.isAdmin && (
+            <div className="flex flex-wrap gap-3">
+              <Link 
+                to="/animes/create" 
+                className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Agregar Anime
+              </Link>
+              
+              <Link 
+                to="/animes/import" 
+                className="px-6 py-2 rounded-full bg-green-600 text-white font-medium hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                Importar Anime
+              </Link>
+            </div>
+          )}
         </div>
         
         {/* Barra de filtros */}
@@ -354,18 +375,23 @@ const AnimeList = () => {
                           <span>{anime.studio}</span>
                         </div>
                         <div className="flex space-x-2">
+                          {isAuthenticated && currentProfile && (
+                            <WatchlistButton animeId={anime.id} size="small" iconOnly={true} />
+                          )}
                           <Link 
                             to={`/animes/${anime.id}`} 
                             className="px-4 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
                           >
                             Detalles
                           </Link>
-                          <Link 
-                            to={`/animes/${anime.id}/edit`} 
-                            className="px-4 py-1 bg-purple-700 hover:bg-purple-600 text-white text-sm rounded transition-colors"
-                          >
-                            Editar
-                          </Link>
+                          {currentUser && currentUser.isAdmin && (
+                            <Link 
+                              to={`/animes/${anime.id}/edit`} 
+                              className="px-4 py-1 bg-purple-700 hover:bg-purple-600 text-white text-sm rounded transition-colors"
+                            >
+                              Editar
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>

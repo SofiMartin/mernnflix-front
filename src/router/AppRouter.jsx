@@ -12,6 +12,7 @@ import AnimeList from '../pages/AnimeList';
 import AnimeDetail from '../pages/AnimeDetail';
 import AnimeCreate from '../pages/AnimeCreate';
 import AnimeEdit from '../pages/AnimeEdit';
+import AnimeImport from '../pages/AnimeImport'; // Nueva importación
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Profiles from '../pages/Profiles';
@@ -83,6 +84,15 @@ const AppRouter = () => {
             <AdminRoute>
               <Navbar />
               <AnimeCreate />
+              <Footer />
+            </AdminRoute>
+          } />
+          
+          {/* Nueva ruta para importar animes */}
+          <Route path="/animes/import" element={
+            <AdminRoute>
+              <Navbar />
+              <AnimeImport />
               <Footer />
             </AdminRoute>
           } />

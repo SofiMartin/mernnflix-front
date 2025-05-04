@@ -146,6 +146,33 @@ export const AnimeProvider = ({ children }) => {
     }
   };
 
+  // Buscar animes en la API externa
+  const searchExternalAPI = async (title) => {
+    try {
+      const response = await animeService.searchExternalAPI(title);
+      return response;
+    } catch (err) {
+      toast.error('Error al buscar en la API externa');
+      console.error(err);
+      return [];
+    }
+  };
+
+  // Importar un anime desde la API externa
+  const importFromExternalAPI = async (externalId) => {
+    try {
+      const response = await animeService.importFromExternalAPI(externalId);
+      toast.success('Anime importado con éxito');
+      // Refrescar la lista de animes
+      fetchAnimes();
+      return response;
+    } catch (err) {
+      toast.error('Error al importar el anime');
+      console.error(err);
+      return null;
+    }
+  };
+
   const value = {
     animes,
     loading,
@@ -160,7 +187,9 @@ export const AnimeProvider = ({ children }) => {
     deleteAnime,
     searchAnimes,
     getRandomAnimes,
-    getGenres
+    getGenres,
+    searchExternalAPI,
+    importFromExternalAPI
   };
 
   return (
