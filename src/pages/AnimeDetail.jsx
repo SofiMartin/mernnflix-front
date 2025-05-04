@@ -19,7 +19,9 @@ const AnimeDetail = () => {
   useEffect(() => {
     const fetchAnime = async () => {
       try {
+        console.log('Buscando anime con ID:', id);
         const data = await getAnimeById(id);
+        console.log('Datos del anime recibidos:', data);
         setAnime(data);
       } catch (error) {
         console.error('Error al obtener el anime:', error);

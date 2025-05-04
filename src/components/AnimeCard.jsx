@@ -101,7 +101,7 @@ const AnimeCard = ({ anime }) => {
         {/* Botones de acción */}
         <div className="flex justify-between">
           <Link 
-            to={`/animes/${anime.id}`} 
+            to={`/animes/${anime._id || anime.id}`}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-md transition-colors flex-grow text-center mr-2"
           >
             Detalles
