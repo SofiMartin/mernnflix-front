@@ -1,15 +1,15 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimeContext } from '../context/AnimeContext';
-import { AuthContext } from '../context/authContext'; // Añadido para verificar si es admin
-import { ProfileContext } from '../context/ProfileContext'; // Añadido para acceder al perfil actual
+import { AuthContext } from '../context/authContext'; 
+import { ProfileContext } from '../context/ProfileContext'; 
 import AnimeCard from '../components/AnimeCard';
-import WatchlistButton from '../components/WatchlistButton'; // Añadido para el botón de watchlist
+import WatchlistButton from '../components/WatchlistButton'; 
 
 const AnimeList = () => {
-  const { animes, loading, error } = useContext(AnimeContext);
-  const { currentUser, isAuthenticated } = useContext(AuthContext); // Actualizado para incluir isAuthenticated
-  const { currentProfile } = useContext(ProfileContext); // Añadido para acceder al perfil actual
+  const { animes, loading, error, fetchAnimes } = useContext(AnimeContext);
+  const { currentUser, isAuthenticated } = useContext(AuthContext);
+  const { currentProfile } = useContext(ProfileContext);
   const [filteredAnimes, setFilteredAnimes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -18,54 +18,91 @@ const AnimeList = () => {
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'title', 'year'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' o 'desc'
   
+   
   // Lista única de géneros a partir de todos los animes
-  const allGenres = [...new Set(animes.flatMap(anime => anime.genres))].sort();
+  const allGenres = [...new Set(animes.flatMap(anime => anime.genres || []))].sort();
   
-  // Aplicar filtros y ordenamiento
+  // Un solo useEffect que maneja tanto la carga inicial como filtrado
   useEffect(() => {
-    let result = [...animes];
-    
-    // Filtrar por término de búsqueda
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(anime => 
-        anime.title.toLowerCase().includes(term) || 
-        anime.synopsis.toLowerCase().includes(term)
-      );
-    }
-    
-    // Filtrar por género
-    if (selectedGenre) {
-      result = result.filter(anime => 
-        anime.genres.includes(selectedGenre)
-      );
-    }
-    
-    // Filtrar por estado
-    if (selectedStatus) {
-      result = result.filter(anime => 
-        anime.status === selectedStatus
-      );
-    }
-    
-    // Ordenar resultados
-    result.sort((a, b) => {
-      if (sortBy === 'rating') {
-        return sortOrder === 'asc' ? a.rating - b.rating : b.rating - a.rating;
-      } else if (sortBy === 'title') {
-        return sortOrder === 'asc' 
-          ? a.title.localeCompare(b.title) 
-          : b.title.localeCompare(a.title);
-      } else if (sortBy === 'year') {
-        return sortOrder === 'asc' 
-          ? a.releaseYear - b.releaseYear 
-          : b.releaseYear - a.releaseYear;
+    const loadAnimesWithFilters = async () => {
+      // Cargar animes si es necesario
+      if (animes.length === 0) {
+        await fetchAnimes();
       }
-      return 0;
-    });
+      
+      // Aplicar filtros del lado del cliente
+      let result = [...animes];
+      
+      // Aplicar filtrado por edad según tipo de perfil
+      if (currentProfile) {
+        // Filtrar explícitamente por clasificación según el tipo de perfil
+        if (currentProfile.type === 'kid') {
+          // Los niños solo pueden ver contenido G y PG
+          result = result.filter(anime => 
+            anime.contentRating === 'G' || anime.contentRating === 'PG'
+          );
+          console.log('Filtrando para perfil infantil:', result.length);
+        } else if (currentProfile.type === 'teen') {
+          // Los adolescentes pueden ver G, PG y PG-13
+          result = result.filter(anime => 
+            anime.contentRating === 'G' || 
+            anime.contentRating === 'PG' || 
+            anime.contentRating === 'PG-13'
+          );
+          console.log('Filtrando para perfil adolescente:', result.length);
+        }
+        // Los perfiles adultos pueden ver todo
+      }
+      
+      // Filtrar por término de búsqueda
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        result = result.filter(anime => 
+          (anime.title && anime.title.toLowerCase().includes(term)) || 
+          (anime.synopsis && anime.synopsis.toLowerCase().includes(term))
+        );
+      }
+      
+      // Filtrar por género
+      if (selectedGenre) {
+        result = result.filter(anime => 
+          anime.genres && anime.genres.includes(selectedGenre)
+        );
+      }
+      
+      // Filtrar por estado
+      if (selectedStatus) {
+        result = result.filter(anime => 
+          anime.status === selectedStatus
+        );
+      }
+      
+      // Ordenar resultados
+      result.sort((a, b) => {
+        if (sortBy === 'rating') {
+          return sortOrder === 'asc' ? a.rating - b.rating : b.rating - a.rating;
+        } else if (sortBy === 'title') {
+          return sortOrder === 'asc' 
+            ? a.title.localeCompare(b.title) 
+            : b.title.localeCompare(a.title);
+        } else if (sortBy === 'year') {
+          return sortOrder === 'asc' 
+            ? a.releaseYear - b.releaseYear 
+            : b.releaseYear - a.releaseYear;
+        }
+        return 0;
+      });
+      
+      console.log('Perfil actual:', currentProfile?.type);
+      console.log('Total de animes después del filtrado:', result.length);
+      
+      setFilteredAnimes(result);
+    };
     
-    setFilteredAnimes(result);
-  }, [animes, searchTerm, selectedGenre, selectedStatus, sortBy, sortOrder]);
+    // Ejecutar la función principal
+    loadAnimesWithFilters();
+    
+  }, [animes, currentProfile, searchTerm, selectedGenre, selectedStatus, sortBy, sortOrder, fetchAnimes]);
   
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -325,13 +362,13 @@ const AnimeList = () => {
             {currentView === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {filteredAnimes.map(anime => (
-                  <AnimeCard key={anime.id} anime={anime} />
+                  <AnimeCard key={anime.id || anime._id} anime={anime} />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
                 {filteredAnimes.map(anime => (
-                  <div key={anime.id} className="flex bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
+                  <div key={anime.id || anime._id} className="flex bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
                     <div className="w-24 md:w-36 flex-shrink-0">
                       <img 
                         src={anime.imageUrl} 
@@ -354,7 +391,7 @@ const AnimeList = () => {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1 my-2">
-                        {anime.genres.map((genre, index) => (
+                        {anime.genres && anime.genres.map((genre, index) => (
                           <span 
                             key={index} 
                             className="px-2 py-1 bg-purple-900/40 text-purple-200 text-xs rounded-full"
@@ -371,27 +408,23 @@ const AnimeList = () => {
                           </span>
                           <span className="mx-2">•</span>
                           <span>{anime.releaseYear}</span>
-                          <span className="mx-2">•</span>
-                          <span>{anime.studio}</span>
+                          {anime.studio && (
+                            <>
+                              <span className="mx-2">•</span>
+                              <span>{anime.studio}</span>
+                            </>
+                          )}
                         </div>
                         <div className="flex space-x-2">
                           {isAuthenticated && currentProfile && (
-                            <WatchlistButton animeId={anime.id} size="small" iconOnly={true} />
+                            <WatchlistButton animeId={anime.id || anime._id} size="small" iconOnly={true} />
                           )}
                           <Link 
-                            to={`/animes/${anime.id}`} 
+                            to={`/animes/${anime.id || anime._id}`} 
                             className="px-4 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
                           >
                             Detalles
                           </Link>
-                          {currentUser && currentUser.isAdmin && (
-                            <Link 
-                              to={`/animes/${anime.id}/edit`} 
-                              className="px-4 py-1 bg-purple-700 hover:bg-purple-600 text-white text-sm rounded transition-colors"
-                            >
-                              Editar
-                            </Link>
-                          )}
                         </div>
                       </div>
                     </div>
