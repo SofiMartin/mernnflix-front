@@ -2,10 +2,13 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/authContext';
 import { ProfileContext } from '../context/ProfileContext';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
   const { currentUser, logout } = useContext(AuthContext);
   const { currentProfile, profiles, selectProfile } = useContext(ProfileContext);
+  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -81,8 +84,8 @@ const Navbar = () => {
   
   // Clase CSS para el estado actual de la navbar
   const navClass = scrolled 
-    ? 'fixed top-0 w-full z-50 bg-black bg-opacity-90 backdrop-blur-md shadow-lg transition-all duration-300'
-    : 'absolute top-0 w-full z-50 bg-gradient-to-b from-black to-transparent transition-all duration-300';
+    ? `fixed top-0 w-full z-50 ${isDarkMode ? 'bg-gray-900 bg-opacity-95' : 'bg-black bg-opacity-90'} backdrop-blur-md shadow-lg transition-all duration-300`
+    : `absolute top-0 w-full z-50 ${isDarkMode ? 'bg-gradient-to-b from-gray-900 to-transparent' : 'bg-gradient-to-b from-black to-transparent'} transition-all duration-300`;
   
   return (
     <nav className={navClass}>
@@ -176,6 +179,9 @@ const Navbar = () => {
                 AGREGAR
               </NavLink>
             )}
+            
+            {/* Botón de cambio de tema */}
+            <ThemeToggle />
           </div>
           
           {/* Perfil y menú de usuario (visible en desktop) */}
@@ -184,7 +190,7 @@ const Navbar = () => {
               <div className="relative" ref={profileMenuRef}>
                 <button 
                   onClick={toggleProfileMenu}
-                  className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 rounded-full pr-3 pl-1 py-1 transition-colors"
+                  className={`flex items-center space-x-2 ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-800 hover:bg-gray-700'} rounded-full pr-3 pl-1 py-1 transition-colors`}
                 >
                   <img 
                     src={currentProfile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentProfile?.name}`} 
@@ -205,14 +211,16 @@ const Navbar = () => {
                 
                 {/* Menú desplegable para perfiles */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg overflow-hidden z-50 border border-gray-700">
+                  <div className={`absolute right-0 mt-2 w-48 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-800'} rounded-md shadow-lg overflow-hidden z-50 border ${isDarkMode ? 'border-gray-800' : 'border-gray-700'}`}>
                     <div className="py-1">
                       {profiles.map(profile => (
                         <button
                           key={profile._id}
                           onClick={() => handleChangeProfile(profile._id)}
-                          className={`w-full text-left px-4 py-2 flex items-center space-x-2 hover:bg-gray-700 transition-colors ${
-                            currentProfile?._id === profile._id ? 'bg-gray-700/50' : ''
+                          className={`w-full text-left px-4 py-2 flex items-center space-x-2 ${
+                            isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-700'
+                          } transition-colors ${
+                            currentProfile?._id === profile._id ? `${isDarkMode ? 'bg-gray-800/70' : 'bg-gray-700/50'}` : ''
                           }`}
                         >
                           <img 
@@ -230,10 +238,10 @@ const Navbar = () => {
                       ))}
                     </div>
                     
-                    <div className="border-t border-gray-700 py-1">
+                    <div className={`border-t ${isDarkMode ? 'border-gray-800' : 'border-gray-700'} py-1`}>
                       <button
                         onClick={handleManageProfiles}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center"
+                        className={`w-full text-left px-4 py-2 text-sm text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-700'} transition-colors flex items-center`}
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -243,7 +251,7 @@ const Navbar = () => {
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center"
+                        className={`w-full text-left px-4 py-2 text-sm text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-700'} transition-colors flex items-center`}
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -274,6 +282,11 @@ const Navbar = () => {
           
           {/* Botón de menú móvil */}
           <div className="md:hidden flex items-center">
+            {/* Botón de cambio de tema (en móvil) */}
+            <div className="mr-2">
+              <ThemeToggle />
+            </div>
+            
             <button
               onClick={toggleMenu}
               className="p-2 text-gray-200 focus:outline-none"
@@ -294,14 +307,14 @@ const Navbar = () => {
       
       {/* Menú móvil desplegable con animación */}
       <div 
-        className={`md:hidden absolute w-full bg-black bg-opacity-95 backdrop-blur-md transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`md:hidden absolute w-full ${isDarkMode ? 'bg-gray-900 bg-opacity-95' : 'bg-black bg-opacity-95'} backdrop-blur-md transition-all duration-300 ease-in-out overflow-hidden ${
           isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="container mx-auto px-4 py-2 space-y-2">
           {/* Perfil actual (móvil) */}
           {currentUser && currentProfile ? (
-            <div className="border-b border-gray-700 pb-3 mb-3">
+            <div className={`border-b ${isDarkMode ? 'border-gray-800' : 'border-gray-700'} pb-3 mb-3`}>
               <div className="flex items-center space-x-3 px-4 py-2">
                 <img 
                   src={currentProfile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentProfile.name}`} 
@@ -318,7 +331,7 @@ const Navbar = () => {
               </div>
               <button
                 onClick={handleManageProfiles}
-                className="w-full mt-2 text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 rounded-md flex items-center"
+                className={`w-full mt-2 text-left px-4 py-2 text-sm text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-800'} rounded-md flex items-center`}
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -328,10 +341,10 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <div className="flex flex-col space-y-2 border-b border-gray-700 pb-4 mb-2">
+            <div className={`flex flex-col space-y-2 border-b ${isDarkMode ? 'border-gray-800' : 'border-gray-700'} pb-4 mb-2`}>
               <Link
                 to="/login"
-                className="w-full px-4 py-3 text-center bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                className={`w-full px-4 py-3 text-center ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-800 hover:bg-gray-700'} text-white rounded-lg transition-colors`}
                 onClick={closeMenu}
               >
                 Iniciar sesión
@@ -352,7 +365,7 @@ const Navbar = () => {
               `block px-4 py-3 border-l-4 rounded-r-md transition-all ${
                 isActive 
                   ? 'border-purple-500 bg-purple-900 bg-opacity-40 text-white' 
-                  : 'border-transparent text-gray-300 hover:bg-gray-900 hover:text-white'
+                  : `border-transparent text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-900'} hover:text-white`
               }`
             }
             onClick={closeMenu}
@@ -365,7 +378,7 @@ const Navbar = () => {
               `block px-4 py-3 border-l-4 rounded-r-md transition-all ${
                 isActive 
                   ? 'border-purple-500 bg-purple-900 bg-opacity-40 text-white' 
-                  : 'border-transparent text-gray-300 hover:bg-gray-900 hover:text-white'
+                  : `border-transparent text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-900'} hover:text-white`
               }`
             }
             onClick={closeMenu}
@@ -381,7 +394,7 @@ const Navbar = () => {
                   `block px-4 py-3 border-l-4 rounded-r-md transition-all ${
                     isActive 
                       ? 'border-purple-500 bg-purple-900 bg-opacity-40 text-white' 
-                      : 'border-transparent text-gray-300 hover:bg-gray-900 hover:text-white'
+                      : `border-transparent text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-900'} hover:text-white`
                   }`
                 }
                 onClick={closeMenu}
@@ -396,7 +409,7 @@ const Navbar = () => {
                     `block px-4 py-3 border-l-4 rounded-r-md transition-all ${
                       isActive 
                         ? 'border-purple-500 bg-purple-900 bg-opacity-40 text-white' 
-                        : 'border-transparent text-gray-300 hover:bg-gray-900 hover:text-white'
+                        : `border-transparent text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-900'} hover:text-white`
                     }`
                   }
                   onClick={closeMenu}
@@ -408,7 +421,7 @@ const Navbar = () => {
               {/* Cerrar sesión (móvil) */}
               <button 
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-3 border-l-4 border-transparent text-gray-300 hover:bg-gray-900 hover:text-white rounded-r-md transition-all mt-4"
+                className={`w-full text-left px-4 py-3 border-l-4 border-transparent text-gray-300 ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-900'} hover:text-white rounded-r-md transition-all mt-4`}
               >
                 <div className="flex items-center">
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

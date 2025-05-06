@@ -9,13 +9,13 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-      <ProfileProvider>
-        <AnimeProvider>
-          <WatchlistProvider>
-            <AppRouter />
-          </WatchlistProvider>
-        </AnimeProvider>
-      </ProfileProvider>
+        <ProfileProvider>
+          <AnimeProvider>
+            <WatchlistProvider>
+              <AppRouter />
+            </WatchlistProvider>
+          </AnimeProvider>
+        </ProfileProvider>
       </ThemeProvider>
     </AuthProvider>
   );
