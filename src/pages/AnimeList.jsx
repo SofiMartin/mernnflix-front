@@ -5,9 +5,10 @@ import { AuthContext } from '../context/authContext';
 import { ProfileContext } from '../context/ProfileContext'; 
 import AnimeCard from '../components/AnimeCard';
 import WatchlistButton from '../components/WatchlistButton'; 
+import Pagination from '../components/Pagination'; 
 
 const AnimeList = () => {
-  const { animes, loading, error, fetchAnimes } = useContext(AnimeContext);
+  const { animes, loading, error, fetchAnimes, totalPages, currentPage, totalAnimes } = useContext(AnimeContext);
   const { currentUser, isAuthenticated } = useContext(AuthContext);
   const { currentProfile } = useContext(ProfileContext);
   const [filteredAnimes, setFilteredAnimes] = useState([]);
@@ -17,92 +18,59 @@ const AnimeList = () => {
   const [currentView, setCurrentView] = useState('grid'); // 'grid' o 'list'
   const [sortBy, setSortBy] = useState('rating'); // 'rating', 'title', 'year'
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' o 'desc'
-  
+  const [isLoading, setIsLoading] = useState(false); // Additional loading state for pagination actions
    
   // Lista única de géneros a partir de todos los animes
   const allGenres = [...new Set(animes.flatMap(anime => anime.genres || []))].sort();
   
-  // Un solo useEffect que maneja tanto la carga inicial como filtrado
+  // Load animes with pagination and filters
   useEffect(() => {
-    const loadAnimesWithFilters = async () => {
-      // Cargar animes si es necesario
-      if (animes.length === 0) {
-        await fetchAnimes();
+    const loadAnimes = async () => {
+      setIsLoading(true);
+      try {
+        await fetchAnimes({
+          page: currentPage,
+          limit: 20,
+          genre: selectedGenre,
+          status: selectedStatus,
+          search: searchTerm,
+          sort: sortBy,
+          order: sortOrder
+        });
+      } catch (error) {
+        console.error("Error loading animes:", error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Aplicar filtros del lado del cliente
-      let result = [...animes];
-      
-      // Aplicar filtrado por edad según tipo de perfil
-      if (currentProfile) {
-        // Filtrar explícitamente por clasificación según el tipo de perfil
-        if (currentProfile.type === 'kid') {
-          // Los niños solo pueden ver contenido G y PG
-          result = result.filter(anime => 
-            anime.contentRating === 'G' || anime.contentRating === 'PG'
-          );
-          console.log('Filtrando para perfil infantil:', result.length);
-        } else if (currentProfile.type === 'teen') {
-          // Los adolescentes pueden ver G, PG y PG-13
-          result = result.filter(anime => 
-            anime.contentRating === 'G' || 
-            anime.contentRating === 'PG' || 
-            anime.contentRating === 'PG-13'
-          );
-          console.log('Filtrando para perfil adolescente:', result.length);
-        }
-        // Los perfiles adultos pueden ver todo
-      }
-      
-      // Filtrar por término de búsqueda
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        result = result.filter(anime => 
-          (anime.title && anime.title.toLowerCase().includes(term)) || 
-          (anime.synopsis && anime.synopsis.toLowerCase().includes(term))
-        );
-      }
-      
-      // Filtrar por género
-      if (selectedGenre) {
-        result = result.filter(anime => 
-          anime.genres && anime.genres.includes(selectedGenre)
-        );
-      }
-      
-      // Filtrar por estado
-      if (selectedStatus) {
-        result = result.filter(anime => 
-          anime.status === selectedStatus
-        );
-      }
-      
-      // Ordenar resultados
-      result.sort((a, b) => {
-        if (sortBy === 'rating') {
-          return sortOrder === 'asc' ? a.rating - b.rating : b.rating - a.rating;
-        } else if (sortBy === 'title') {
-          return sortOrder === 'asc' 
-            ? a.title.localeCompare(b.title) 
-            : b.title.localeCompare(a.title);
-        } else if (sortBy === 'year') {
-          return sortOrder === 'asc' 
-            ? a.releaseYear - b.releaseYear 
-            : b.releaseYear - a.releaseYear;
-        }
-        return 0;
-      });
-      
-      console.log('Perfil actual:', currentProfile?.type);
-      console.log('Total de animes después del filtrado:', result.length);
-      
-      setFilteredAnimes(result);
     };
     
-    // Ejecutar la función principal
-    loadAnimesWithFilters();
-    
-  }, [animes, currentProfile, searchTerm, selectedGenre, selectedStatus, sortBy, sortOrder, fetchAnimes]);
+    loadAnimes();
+  }, [currentPage, selectedGenre, selectedStatus, sortBy, sortOrder, currentProfile]);
+
+  // Filter animes client-side when search term changes
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = animes.filter(anime => 
+        anime.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (anime.synopsis && anime.synopsis.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredAnimes(filtered);
+    } else {
+      setFilteredAnimes(animes);
+    }
+  }, [animes, searchTerm]);
+  
+  const handlePageChange = (pageNumber) => {
+    fetchAnimes({
+      page: pageNumber,
+      limit: 20,
+      genre: selectedGenre,
+      status: selectedStatus,
+      search: searchTerm,
+      sort: sortBy,
+      order: sortOrder
+    });
+  };
   
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -130,10 +98,16 @@ const AnimeList = () => {
     setSelectedStatus('');
     setSortBy('rating');
     setSortOrder('desc');
+    fetchAnimes({
+      page: 1,
+      limit: 20,
+      sort: 'rating',
+      order: 'desc'
+    });
   };
   
   // Componente para estado de carga
-  if (loading) {
+  if (loading && !isLoading) { // Only show full loading screen on initial load
     return (
       <div className="min-h-screen bg-gray-900 pt-24 px-4">
         <div className="container mx-auto">
@@ -170,6 +144,8 @@ const AnimeList = () => {
       </div>
     );
   }
+  
+  const displayedAnimes = searchTerm ? filteredAnimes : animes;
   
   return (
     <div className="min-h-screen bg-gray-900 pt-24 pb-16">
@@ -329,8 +305,15 @@ const AnimeList = () => {
           </div>
         </div>
         
+        {/* Loading overlay for pagination */}
+        {isLoading && (
+          <div className="flex justify-center my-4">
+            <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
+        
         {/* Resultados */}
-        {filteredAnimes.length === 0 ? (
+        {displayedAnimes.length === 0 ? (
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-10 text-center">
             <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -354,20 +337,21 @@ const AnimeList = () => {
             {/* Contador de resultados */}
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-300">
-                <span className="font-medium text-white">{filteredAnimes.length}</span> {filteredAnimes.length === 1 ? 'anime encontrado' : 'animes encontrados'}
+                <span className="font-medium text-white">{totalAnimes}</span> {totalAnimes === 1 ? 'anime encontrado' : 'animes encontrados'}
+                {totalAnimes > displayedAnimes.length && ` (mostrando ${displayedAnimes.length})`}
               </p>
             </div>
             
             {/* Lista de animes */}
             {currentView === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {filteredAnimes.map(anime => (
+                {displayedAnimes.map(anime => (
                   <AnimeCard key={anime.id || anime._id} anime={anime} />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredAnimes.map(anime => (
+                {displayedAnimes.map(anime => (
                   <div key={anime.id || anime._id} className="flex bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
                     <div className="w-24 md:w-36 flex-shrink-0">
                       <img 
@@ -431,6 +415,15 @@ const AnimeList = () => {
                   </div>
                 ))}
               </div>
+            )}
+            
+            {/* Pagination component */}
+            {!searchTerm && totalPages > 1 && (
+              <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                onPageChange={handlePageChange} 
+              />
             )}
           </>
         )}
