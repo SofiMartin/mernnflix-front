@@ -2,51 +2,29 @@
 import React from 'react';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  // Generate page numbers array
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
-    
-    // Always show first page
+
     pageNumbers.push(1);
-    
-    // Calculate range to show
+
     let startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 3);
-    
-    if (endPage - startPage < maxPagesToShow - 3) {
-      startPage = Math.max(2, endPage - (maxPagesToShow - 3));
-    }
-    
-    // Add ... after page 1 if needed
-    if (startPage > 2) {
-      pageNumbers.push('...');
-    }
-    
-    // Add pages in the middle
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
-    }
-    
-    // Add ... before last page if needed
-    if (endPage < totalPages - 1) {
-      pageNumbers.push('...');
-    }
-    
-    // Always show last page (if different from first)
-    if (totalPages > 1) {
-      pageNumbers.push(totalPages);
-    }
-    
+
+    if (startPage > 2) pageNumbers.push('...');
+    for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
+    if (endPage < totalPages - 1) pageNumbers.push('...');
+    if (totalPages > 1) pageNumbers.push(totalPages);
+
     return pageNumbers;
   };
-  
+
   if (totalPages <= 1) return null;
-  
+
   return (
     <div className="flex justify-center mt-8">
       <nav className="flex items-center space-x-1">
-        {/* Previous button */}
+        {/* Botón Anterior */}
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
@@ -60,8 +38,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
         </button>
-        
-        {/* Page numbers */}
+
+        {/* Números de página */}
         {getPageNumbers().map((page, index) => (
           <button
             key={index}
@@ -78,8 +56,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             {page}
           </button>
         ))}
-        
-        {/* Next button */}
+
+        {/* Botón Siguiente */}
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}

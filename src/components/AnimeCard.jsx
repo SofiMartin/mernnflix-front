@@ -108,9 +108,7 @@ const AnimeCard = ({ anime }) => {
           </Link>
 
           <div className="flex space-x-2">
-    {/* Botón de Watchlist */}
-    <WatchlistButton animeId={anime.id} size="small" iconOnly={true} />
-          
+       
           {/* Mostrar el botón de editar solo si el usuario es administrador */}
           {isAuthenticated && currentUser && currentUser.isAdmin && (
             <Link 
