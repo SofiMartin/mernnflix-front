@@ -2,10 +2,12 @@ import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AnimeContext } from '../context/AnimeContext';
 import { toast } from 'react-toastify';
+import { useTheme } from '../context/ThemeContext';
 
 const AnimeCreate = () => {
   const { createAnime } = useContext(AnimeContext);
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -166,10 +168,14 @@ const AnimeCreate = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gray-900 pt-24 pb-16">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} pt-24 pb-16`}>
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto bg-gray-800/60 backdrop-blur-sm rounded-xl shadow-lg p-6 md:p-8 border border-gray-700">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 flex items-center">
+        <div className={`max-w-3xl mx-auto ${
+          isDarkMode ? 'bg-gray-800/60 border-gray-700' : 'bg-white border-gray-200'
+        } rounded-xl shadow-lg p-6 md:p-8 border backdrop-blur-sm`}>
+          <h1 className={`text-2xl md:text-3xl font-bold ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          } mb-6 flex items-center`}>
             <span className="bg-gradient-to-r from-purple-500 to-pink-500 w-1 h-8 rounded-full mr-3"></span>
             Agregar Nuevo Anime
           </h1>
@@ -177,7 +183,7 @@ const AnimeCreate = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Título */}
             <div>
-              <label className="block text-gray-300 mb-2 font-medium" htmlFor="title">
+              <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="title">
                 Título <span className="text-red-400">*</span>
               </label>
               <input
@@ -186,7 +192,9 @@ const AnimeCreate = () => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className={`w-full p-3 bg-gray-700 border ${errors.title ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
+                className={`w-full p-3 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                } border ${errors.title ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
                 placeholder="Nombre del anime"
               />
               {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title}</p>}
@@ -194,7 +202,7 @@ const AnimeCreate = () => {
             
             {/* URL de la imagen */}
             <div>
-              <label className="block text-gray-300 mb-2 font-medium" htmlFor="imageUrl">
+              <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="imageUrl">
                 URL de la imagen <span className="text-red-400">*</span>
               </label>
               <input
@@ -203,7 +211,9 @@ const AnimeCreate = () => {
                 name="imageUrl"
                 value={formData.imageUrl}
                 onChange={handleChange}
-                className={`w-full p-3 bg-gray-700 border ${errors.imageUrl ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
+                className={`w-full p-3 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                } border ${errors.imageUrl ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
                 placeholder="https://ejemplo.com/imagen.jpg"
               />
               {errors.imageUrl && <p className="text-red-400 text-sm mt-1">{errors.imageUrl}</p>}
@@ -211,7 +221,9 @@ const AnimeCreate = () => {
               {/* Vista previa de la imagen */}
               {formData.imageUrl && (
                 <div className="mt-2 flex justify-center">
-                  <div className="relative w-32 h-48 rounded overflow-hidden border border-gray-600">
+                  <div className={`relative w-32 h-48 rounded overflow-hidden ${
+                    isDarkMode ? 'border-gray-600' : 'border-gray-300'
+                  } border`}>
                     <img 
                       src={formData.imageUrl} 
                       alt="Vista previa" 
@@ -235,10 +247,12 @@ const AnimeCreate = () => {
             
             {/* Géneros */}
             <div>
-              <label className="block text-gray-300 mb-2 font-medium">
+              <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`}>
                 Géneros <span className="text-red-400">*</span>
               </label>
-              <div className="bg-gray-700 border border-gray-600 rounded-lg p-4">
+              <div className={`${
+                isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'
+              } border rounded-lg p-4`}>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {genreOptions.map(genre => (
                     <div key={genre} className="flex items-center">
@@ -248,9 +262,13 @@ const AnimeCreate = () => {
                         value={genre}
                         checked={formData.genres.includes(genre)}
                         onChange={handleGenreChange}
-                        className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+                        className={`w-4 h-4 text-purple-600 ${
+                          isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'
+                        } border rounded focus:ring-purple-500 focus:ring-2`}
                       />
-                      <label htmlFor={`genre-${genre}`} className="ml-2 text-gray-300">
+                      <label htmlFor={`genre-${genre}`} className={`ml-2 ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
                         {genre}
                       </label>
                     </div>
@@ -290,7 +308,7 @@ const AnimeCreate = () => {
             
             {/* Sinopsis */}
             <div>
-              <label className="block text-gray-300 mb-2 font-medium" htmlFor="synopsis">
+              <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="synopsis">
                 Sinopsis <span className="text-red-400">*</span>
               </label>
               <textarea
@@ -299,16 +317,22 @@ const AnimeCreate = () => {
                 value={formData.synopsis}
                 onChange={handleChange}
                 rows="5"
-                className={`w-full p-3 bg-gray-700 border ${errors.synopsis ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none`}
+                className={`w-full p-3 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                } border ${errors.synopsis ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-none`}
                 placeholder="Describe la historia del anime..."
               ></textarea>
               <div className="flex justify-between mt-1">
                 {errors.synopsis ? (
                   <p className="text-red-400 text-sm">{errors.synopsis}</p>
                 ) : (
-                  <p className="text-gray-400 text-xs">Mínimo 20 caracteres</p>
+                  <p className={`text-xs ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}>Mínimo 20 caracteres</p>
                 )}
-                <p className="text-gray-400 text-xs">{formData.synopsis.length} caracteres</p>
+                <p className={`text-xs ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>{formData.synopsis.length} caracteres</p>
               </div>
             </div>
             
@@ -316,7 +340,7 @@ const AnimeCreate = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {/* Rating */}
               <div>
-                <label className="block text-gray-300 mb-2 font-medium" htmlFor="rating">
+                <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="rating">
                   Puntuación <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
@@ -329,10 +353,12 @@ const AnimeCreate = () => {
                     step="0.1"
                     value={formData.rating}
                     onChange={handleNumberChange}
-                    className={`w-full p-3 bg-gray-700 border ${errors.rating ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors pr-12`}
+                    className={`w-full p-3 ${
+                      isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                    } border ${errors.rating ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors pr-12`}
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <span className="text-gray-400">/10</span>
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>/10</span>
                   </div>
                 </div>
                 {errors.rating && <p className="text-red-400 text-sm mt-1">{errors.rating}</p>}
@@ -340,7 +366,7 @@ const AnimeCreate = () => {
               
               {/* Año de lanzamiento */}
               <div>
-                <label className="block text-gray-300 mb-2 font-medium" htmlFor="releaseYear">
+                <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="releaseYear">
                   Año <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -351,14 +377,16 @@ const AnimeCreate = () => {
                   max={new Date().getFullYear() + 1}
                   value={formData.releaseYear}
                   onChange={handleNumberChange}
-                  className={`w-full p-3 bg-gray-700 border ${errors.releaseYear ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
+                  className={`w-full p-3 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                  } border ${errors.releaseYear ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
                 />
                 {errors.releaseYear && <p className="text-red-400 text-sm mt-1">{errors.releaseYear}</p>}
               </div>
               
               {/* Temporadas */}
               <div>
-                <label className="block text-gray-300 mb-2 font-medium" htmlFor="seasonCount">
+                <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="seasonCount">
                   Temporadas <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -368,14 +396,16 @@ const AnimeCreate = () => {
                   min="1"
                   value={formData.seasonCount}
                   onChange={handleNumberChange}
-                  className={`w-full p-3 bg-gray-700 border ${errors.seasonCount ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
+                  className={`w-full p-3 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                  } border ${errors.seasonCount ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
                 />
                 {errors.seasonCount && <p className="text-red-400 text-sm mt-1">{errors.seasonCount}</p>}
               </div>
               
               {/* Episodios */}
               <div>
-                <label className="block text-gray-300 mb-2 font-medium" htmlFor="episodeCount">
+                <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="episodeCount">
                   Episodios <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -385,7 +415,9 @@ const AnimeCreate = () => {
                   min="1"
                   value={formData.episodeCount}
                   onChange={handleNumberChange}
-                  className={`w-full p-3 bg-gray-700 border ${errors.episodeCount ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
+                  className={`w-full p-3 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                  } border ${errors.episodeCount ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
                 />
                 {errors.episodeCount && <p className="text-red-400 text-sm mt-1">{errors.episodeCount}</p>}
               </div>
@@ -395,7 +427,7 @@ const AnimeCreate = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Estudio */}
               <div>
-                <label className="block text-gray-300 mb-2 font-medium" htmlFor="studio">
+                <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="studio">
                   Estudio <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -404,7 +436,9 @@ const AnimeCreate = () => {
                   name="studio"
                   value={formData.studio}
                   onChange={handleChange}
-                  className={`w-full p-3 bg-gray-700 border ${errors.studio ? 'border-red-500' : 'border-gray-600'} rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
+                  className={`w-full p-3 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                  } border ${errors.studio ? 'border-red-500' : ''} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors`}
                   placeholder="Nombre del estudio"
                 />
                 {errors.studio && <p className="text-red-400 text-sm mt-1">{errors.studio}</p>}
@@ -412,7 +446,7 @@ const AnimeCreate = () => {
               
               {/* Estado */}
               <div>
-                <label className="block text-gray-300 mb-2 font-medium" htmlFor="status">
+                <label className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 font-medium`} htmlFor="status">
                   Estado <span className="text-red-400">*</span>
                 </label>
                 <select
@@ -420,8 +454,14 @@ const AnimeCreate = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors appearance-none"
-                  style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')", backgroundPosition: "right 0.75rem center", backgroundRepeat: "no-repeat" }}
+                  className={`w-full p-3 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+                  } border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors appearance-none`}
+                  style={{ 
+                    backgroundImage: `url('data:image/svg+xml;utf8,<svg fill="${isDarkMode ? 'white' : 'black'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M7 10l5 5 5-5z"/></svg>')`, 
+                    backgroundPosition: "right 0.75rem center", 
+                    backgroundRepeat: "no-repeat" 
+                  }}
                 >
                   <option value="En emisión">En emisión</option>
                   <option value="Finalizado">Finalizado</option>
@@ -432,10 +472,14 @@ const AnimeCreate = () => {
             </div>
             
             {/* Botones */}
-            <div className="flex justify-between pt-6 border-t border-gray-700">
+            <div className={`flex justify-between pt-6 border-t ${
+              isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            }`}>
               <Link 
                 to="/animes" 
-                className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center"
+                className={`px-6 py-3 ${
+                  isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+                } text-white rounded-lg transition-colors flex items-center`}
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
