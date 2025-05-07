@@ -1,4 +1,3 @@
-// components/Pagination.jsx
 import React from 'react';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
@@ -28,10 +27,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-3 py-2 rounded-md ${
+          className={`px-3 py-2 rounded-md transition-colors ${
             currentPage === 1
-              ? 'text-gray-500 cursor-not-allowed'
-              : 'text-white hover:bg-gray-700'
+              ? 'text-gray-500 cursor-not-allowed bg-gray-800/50'
+              : 'text-gray-300 hover:bg-gray-800 hover:text-white bg-gray-900/80'
           }`}
         >
           <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -45,12 +44,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             key={index}
             onClick={() => typeof page === 'number' ? onPageChange(page) : null}
             disabled={page === '...'}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-4 py-2 rounded-md transition-colors ${
               currentPage === page
-                ? 'bg-purple-600 text-white'
+                ? 'bg-purple-700 text-white font-medium shadow-lg shadow-purple-900/30'
                 : page === '...'
-                  ? 'text-gray-500 cursor-default'
-                  : 'text-white hover:bg-gray-700'
+                  ? 'text-gray-400 cursor-default bg-transparent'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white bg-gray-900/80'
             }`}
           >
             {page}
@@ -61,10 +60,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-3 py-2 rounded-md ${
+          className={`px-3 py-2 rounded-md transition-colors ${
             currentPage === totalPages
-              ? 'text-gray-500 cursor-not-allowed'
-              : 'text-white hover:bg-gray-700'
+              ? 'text-gray-500 cursor-not-allowed bg-gray-800/50'
+              : 'text-gray-300 hover:bg-gray-800 hover:text-white bg-gray-900/80'
           }`}
         >
           <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

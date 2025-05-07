@@ -115,7 +115,7 @@ const WatchlistPage = () => {
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Mi Lista</h1>
+            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-2">Mi Lista</h1>
             {currentProfile && (
               <p className="text-gray-400">
                 Perfil: <span className="text-white">{currentProfile.name}</span>
@@ -126,19 +126,19 @@ const WatchlistPage = () => {
           {/* Estadísticas */}
           {stats && (
             <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
-              <div className="px-4 py-2 bg-gray-800/60 rounded-lg flex flex-col items-center">
+              <div className="px-4 py-2 bg-gray-800/80 rounded-lg flex flex-col items-center shadow-md">
                 <span className="text-lg font-bold text-white">{stats.total}</span>
                 <span className="text-xs text-gray-400">Total</span>
               </div>
-              <div className="px-4 py-2 bg-gray-800/60 rounded-lg flex flex-col items-center">
+              <div className="px-4 py-2 bg-yellow-900/20 border border-yellow-800/30 rounded-lg flex flex-col items-center shadow-md">
                 <span className="text-lg font-bold text-yellow-400">{stats.favorites}</span>
                 <span className="text-xs text-gray-400">Favoritos</span>
               </div>
-              <div className="px-4 py-2 bg-green-900/20 border border-green-800/30 rounded-lg flex flex-col items-center">
+              <div className="px-4 py-2 bg-green-900/20 border border-green-800/30 rounded-lg flex flex-col items-center shadow-md">
                 <span className="text-lg font-bold text-green-400">{stats.watching}</span>
                 <span className="text-xs text-gray-400">Viendo</span>
               </div>
-              <div className="px-4 py-2 bg-purple-900/20 border border-purple-800/30 rounded-lg flex flex-col items-center">
+              <div className="px-4 py-2 bg-purple-900/20 border border-purple-800/30 rounded-lg flex flex-col items-center shadow-md">
                 <span className="text-lg font-bold text-purple-400">{stats.completed}</span>
                 <span className="text-xs text-gray-400">Completados</span>
               </div>
@@ -147,10 +147,10 @@ const WatchlistPage = () => {
         </div>
         
         {/* Tabs de filtrado */}
-        <div className="mb-6 border-b border-gray-700">
+        <div className="mb-6 border-b border-gray-800">
           <div className="flex flex-wrap -mb-px">
             <button
-              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 ${
+              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'all'
                   ? 'text-purple-500 border-purple-500'
                   : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300'
@@ -160,9 +160,9 @@ const WatchlistPage = () => {
               Todos
             </button>
             <button
-              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 ${
+              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'favorites'
-                  ? 'text-yellow-500 border-yellow-500'
+                  ? 'text-yellow-400 border-yellow-400'
                   : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300'
               }`}
               onClick={() => setActiveTab('favorites')}
@@ -170,9 +170,9 @@ const WatchlistPage = () => {
               Favoritos
             </button>
             <button
-              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 ${
+              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'watching'
-                  ? 'text-green-500 border-green-500'
+                  ? 'text-green-400 border-green-400'
                   : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300'
               }`}
               onClick={() => setActiveTab('watching')}
@@ -180,9 +180,9 @@ const WatchlistPage = () => {
               Viendo
             </button>
             <button
-              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 ${
+              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'completed'
-                  ? 'text-purple-500 border-purple-500'
+                  ? 'text-purple-400 border-purple-400'
                   : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300'
               }`}
               onClick={() => setActiveTab('completed')}
@@ -190,9 +190,9 @@ const WatchlistPage = () => {
               Completados
             </button>
             <button
-              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 ${
+              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'plan_to_watch'
-                  ? 'text-blue-500 border-blue-500'
+                  ? 'text-blue-400 border-blue-400'
                   : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300'
               }`}
               onClick={() => setActiveTab('plan_to_watch')}
@@ -200,9 +200,9 @@ const WatchlistPage = () => {
               Por ver
             </button>
             <button
-              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 ${
+              className={`mr-2 inline-block py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'dropped'
-                  ? 'text-gray-500 border-gray-500'
+                  ? 'text-gray-400 border-gray-400'
                   : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-300'
               }`}
               onClick={() => setActiveTab('dropped')}
@@ -214,7 +214,7 @@ const WatchlistPage = () => {
         
         {/* Lista de animes */}
         {filteredList.length === 0 ? (
-          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-10 text-center">
+          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-10 text-center shadow-lg">
             <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -240,7 +240,7 @@ const WatchlistPage = () => {
         ) : (
           <div className="space-y-4">
             {filteredList.map(entry => (
-              <div key={entry._id} className="flex bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
+              <div key={entry._id} className="flex bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors shadow-md">
                 <div className="w-24 md:w-36 flex-shrink-0">
                   <img 
                     src={entry.anime.imageUrl} 
@@ -263,7 +263,7 @@ const WatchlistPage = () => {
                       )}
                     </div>
                     <div className="flex items-center">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(entry.status)}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full backdrop-blur-sm ${getStatusColor(entry.status)}`}>
                         {getStatusName(entry.status)}
                       </span>
                     </div>
@@ -273,7 +273,7 @@ const WatchlistPage = () => {
                     {entry.anime.genres && entry.anime.genres.map((genre, index) => (
                       <span 
                         key={index} 
-                        className="px-2 py-1 bg-purple-900/40 text-purple-200 text-xs rounded-full"
+                        className="px-2 py-1 bg-purple-900/50 text-purple-200 text-xs rounded-full"
                       >
                         {genre}
                       </span>
@@ -308,6 +308,7 @@ const WatchlistPage = () => {
                             ? 'bg-yellow-600 text-white' 
                             : 'bg-gray-700 text-gray-400 hover:text-yellow-400'
                         }`}
+                        aria-label={entry.isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
@@ -318,6 +319,7 @@ const WatchlistPage = () => {
                       <button
                         onClick={() => handleRemove(entry)}
                         className="p-1 bg-gray-700 text-gray-400 hover:text-red-400 rounded-full"
+                        aria-label="Eliminar de la lista"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -328,6 +330,7 @@ const WatchlistPage = () => {
                       <Link
                         to={`/animes/${entry.anime._id}`}
                         className="p-1 bg-gray-700 text-gray-400 hover:text-white rounded-full"
+                        aria-label="Ver detalles"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
